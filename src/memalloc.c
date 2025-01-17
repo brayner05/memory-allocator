@@ -55,5 +55,12 @@ void *heap_alloc(size_t size) {
 }
 
 int heap_free(void *ptr) {
+    MemoryChunk *chunk = free_list;
+    while (chunk != NULL) {
+        if (chunk->address == ptr) {
+            chunk->is_free = 1;
+            return 0;
+        }
+    }
     return -1;
 }
