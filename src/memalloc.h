@@ -12,7 +12,7 @@ void *heap_alloc(size_t size);
 /**
  * Free memory allocated from the heap.
  * @param ptr A pointer to the memory to free
- * @return 0 on success, -1 on error, 1 if the memory has already been freed.
+ * @return 0 on success, -1 on error
  */
 int heap_free(void *ptr);
 
