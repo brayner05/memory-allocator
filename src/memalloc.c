@@ -11,12 +11,44 @@ typedef struct MemoryChunk {
 // A linked-list representing all allocated memory.
 static MemoryChunk *free_list = NULL;
 
+// =====================================
+// ! TO BE REMOVED
+// =====================================
+
+#define DEBUG
+#ifdef DEBUG
+#include <stdio.h>
+
+void print_free(void) {
+    MemoryChunk *chunk = free_list;
+    while (chunk != NULL) {
+        printf("[%p | %lub | %s] -> ", chunk->address, chunk->size, chunk->is_free ? "free" : "in use");
+        chunk = chunk->next;
+    }
+}
+
+#endif
+
 /**
  * Align a quantity of memory to the machines register size.
  */
 static inline size_t align_up(size_t size, size_t align) {
     return (size + align - 1) & ~(align - 1);
 }
+
+/**
+ * 
+ */
+static void add_to_free_list(MemoryChunk *chunk) {
+    if (free_list == NULL) {
+        free_list = chunk;
+        return;
+    }
+
+    chunk->next = free_list;
+    free_list = chunk;
+}
+
 
 /**
  * Allocate memory on the heap.
@@ -29,7 +61,7 @@ void *heap_alloc(size_t size) {
     
     MemoryChunk *chunk = free_list;
     while (chunk != NULL) {
-        if (chunk->is_free && chunk->size >= total_size) {
+        if (chunk->is_free && chunk->size >= size) {
             break;
         }
         chunk = chunk->next;
@@ -41,17 +73,20 @@ void *heap_alloc(size_t size) {
             return NULL;
         }
 
+        void *allocated_memory = (void *) chunk + sizeof(chunk);
         *chunk = (MemoryChunk) {
-            .address = chunk,
-            .is_free = 0,
+            .address = allocated_memory,
+            .is_free = (_Bool) 0,
             .next = NULL,
             .size = size
         };
 
-        return chunk + 1;
+        add_to_free_list(chunk);
+        return allocated_memory;
     }
 
-    return chunk + 1;
+    chunk->is_free = (_Bool) 0;
+    return chunk->address;
 }
 
 int heap_free(void *ptr) {
@@ -61,6 +96,7 @@ int heap_free(void *ptr) {
             chunk->is_free = 1;
             return 0;
         }
+        chunk = chunk->next;
     }
     return -1;
 }

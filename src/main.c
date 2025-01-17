@@ -3,9 +3,15 @@
 #include "sys_brk.h"
 #include "memalloc.h"
 
+void print_free();
+
 int main(void) {
-    char *message = heap_alloc(16 * sizeof(char));
-    strcpy(message, "Hello, World?");
-    puts(message);
-    heap_free(message);
+    heap_alloc(10);
+    void *ptr = heap_alloc(16);
+    heap_alloc(30);
+    heap_free(ptr);
+    print_free();
+    puts("");
+    heap_alloc(16);
+    print_free();
 }
