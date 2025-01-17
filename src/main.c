@@ -7,4 +7,5 @@ int main(void) {
     char *message = heap_alloc(16 * sizeof(char));
     strcpy(message, "Hello, World?");
     puts(message);
+    heap_free(message);
 }
