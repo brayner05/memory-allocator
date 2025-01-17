@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <string.h>
+#include "sys_brk.h"
 
 int main(void) {
-    puts("Hello, World!");
+    char *ptr = (char *) _sbrk(16);
+    strcpy(ptr, "Hello, World!\n");
+    puts(ptr);
 }
