@@ -37,7 +37,8 @@ static inline size_t align_up(size_t size, size_t align) {
 }
 
 /**
- * 
+ * Add a chunk of memory to the front of the linked-list of chunks to free.
+ * @param chunk The chunk of memory to add to the list.
  */
 static void add_to_free_list(MemoryChunk *chunk) {
     if (free_list == NULL) {
@@ -49,7 +50,6 @@ static void add_to_free_list(MemoryChunk *chunk) {
     free_list = chunk;
 }
 
-
 /**
  * Allocate memory on the heap.
  * @param size The number of bytes to allocate.
@@ -59,6 +59,7 @@ void *heap_alloc(size_t size) {
     size_t total_size = size + sizeof(MemoryChunk);
     total_size = align_up(total_size, sizeof(void *));
     
+    // Check for an existing free memory chunk with a matching size.
     MemoryChunk *chunk = free_list;
     while (chunk != NULL) {
         if (chunk->is_free && chunk->size >= size) {
@@ -67,6 +68,7 @@ void *heap_alloc(size_t size) {
         chunk = chunk->next;
     }
 
+    // If no such chunk exists, create one.
     if (chunk == NULL) {
         chunk = (MemoryChunk *) _sbrk(total_size);
         if (chunk == (void *) -1) {
@@ -85,6 +87,7 @@ void *heap_alloc(size_t size) {
         return allocated_memory;
     }
 
+    // Mark the chunk as in use, and return it
     chunk->is_free = (_Bool) 0;
     return chunk->address;
 }
@@ -93,7 +96,7 @@ int heap_free(void *ptr) {
     MemoryChunk *chunk = free_list;
     while (chunk != NULL) {
         if (chunk->address == ptr) {
-            chunk->is_free = 1;
+            chunk->is_free = (_Bool) 1;
             return 0;
         }
         chunk = chunk->next;
